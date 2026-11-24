@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title or "Error" }} - ScholarSync</title>
+</head>
+<body>
+  <h1>{{ code or 500 }} - {{ title or "Something Went Wrong" }}</h1>
+  <p>{{ message or "An unexpected error occurred. Please try again." }}</p>
+  <a href="/">Go back home</a>
+</body>
+</html>
