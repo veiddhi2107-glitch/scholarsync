@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}ScholarSync — Big plans? Let's make them happen.{% endblock %}
+
+{% block content %}
+  <style>
+    .hero-banner {
+      background-color: var(--navy);
+      color: var(--white);
+      border-radius: 14px;
+      padding: clamp(2.5rem, 6vw, 4.25rem) clamp(1.75rem, 5vw, 3.75rem);
+      box-shadow: 0 8px 24px rgba(16, 28, 54, 0.12);
+    }
+
+    .page-section {
+      margin-top: 3rem;
+    }
+
+    .section-header {
+      margin-bottom: 1.5rem;
+      max-width: 62ch;
+    }
+
+    .section-title {
+      font-size: clamp(1.45rem, 2.8vw, 1.9rem);
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      margin-top: 0.45rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .section-subtitle {
+      color: var(--slate);
+      font-size: 0.98rem;
+    }
+
+    .preview-layout {
+      display: grid;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .preview-opp-card {
+      background-color: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 3px rgba(16, 28, 54, 0.05), 0 4px 12px rgba(16, 28, 54, 0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .preview-opp-card:hover {
+      transform: translateY(-2px);
+      border-color: #99F6E4;
+      box-shadow: 0 8px 20px rgba(16, 28, 54, 0.07);
+    }
+
+    .fit-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--teal);
+      background-color: var(--soft-white);
+      border: 1px solid var(--light-teal);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .icon-chip {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background-color: var(--light-teal);
+      color: var(--teal);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background-color: var(--light-teal);
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.9rem;
+    }
+
+    @media (max-width: 860px) {
+      .preview-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <!-- 1. HERO SECTION (Spacious Deep Navy Single-Column) -->
+  <section class="hero-banner">
+    <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; margin-bottom: 1.35rem;">
+      <span style="color: var(--teal); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;">
+        YOUR AMBITION DESERVES BETTER.
+      </span>
+      <span class="badge-teal">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background-color: var(--teal);"></span>
+        {{ opp_count }} Active {{ "Opportunity" if opp_count == 1 else "Opportunities" }}
+      </span>
+    </div>
+
+    <h1 style="font-size: clamp(2.15rem, 4.6vw, 3.2rem); line-height: 1.13; font-weight: 800; letter-spacing: -0.025em; color: var(--white); max-width: 19ch; margin-bottom: 1.25rem;">
+      Big plans? <span style="color: var(--teal);">Let's make them happen.</span>
+    </h1>
+
+    <p style="color: #CBD5E1; font-size: 1.08rem; max-width: 60ch; margin-bottom: 1.15rem;">
+      No more endless searching, scattered links or missed deadlines. Discover opportunities,
+      find your fit and turn your academic ambitions into real-world experiences.
+    </p>
+
+    <p style="color: var(--white); font-weight: 700; font-size: 1.06rem; margin-bottom: 2rem;">
+      Less searching. <span style="color: var(--teal);">Smarter moves.</span> Bigger possibilities.
+    </p>
+
+    <div style="display: flex; gap: 0.95rem; flex-wrap: wrap; align-items: center;">
+      {% if current_user %}
+        <a class="btn btn-primary" href="{{ url_for('dashboard') }}" style="padding: 0.75rem 1.5rem;">
+          Go to Dashboard
+        </a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('register') }}" style="padding: 0.75rem 1.5rem;">
+          Get Started
+        </a>
+      {% endif %}
+      <a class="btn btn-outline-light" href="{{ url_for('explore') }}" style="padding: 0.75rem 1.5rem;">
+        Explore Opportunities
+      </a>
+    </div>
+  </section>
+
+  <!-- 2. OPPORTUNITY PREVIEW SECTION (Dedicated Section Below Hero) -->
+  <section id="opportunity-preview" class="page-section" aria-label="Opportunity Fit Preview">
+    <div class="section-header">
+      <span class="badge-teal">Live Preview</span>
+      <h2 class="section-title">See How Fit &amp; Deadlines Come Together</h2>
+      <p class="section-subtitle">
+        Every listing surfaces eligibility signals, closing dates, and your profile readiness at a glance.
+      </p>
+    </div>
+
+    <div class="preview-layout">
+      <!-- Sample Opportunity Cards -->
+      <div style="display: grid; gap: 1rem;">
+        <div class="preview-opp-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.55rem;">
+            <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+              <span class="badge-teal">Internship</span>
+              <span style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">Remote &middot; B.Tech / CS</span>
+            </div>
+            <span class="fit-pill">&#10003; 94% Fit &middot; Eligible</span>
+          </div>
+          <div style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.35rem;">
+            Software Engineering Summer Intern
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.86rem; color: var(--slate);">
+            <span>Summer Cohort &middot; Product &amp; Systems</span>
+            <span style="font-weight: 700; color: var(--navy);">Deadline: Due in 5 days</span>
+          </div>
+        </div>
+
+        <div class="preview-opp-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.55rem;">
+            <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+              <span class="badge-teal">Hackathon</span>
+              <span style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">Hybrid &middot; All Years</span>
+            </div>
+            <span class="fit-pill">&#10003; 89% Fit &middot; Open</span>
+          </div>
+          <div style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.35rem;">
+            National AI &amp; FinTech Buildathon
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.86rem; color: var(--slate);">
+            <span>Team Challenge &middot; Prototype Track</span>
+            <span style="font-weight: 700; color: var(--navy);">Deadline: Dec 04</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Readiness & Upcoming Deadlines Summary Card -->
+      <div class="card" style="display: flex; flex-direction: column; gap: 1.15rem;">
+        <div>
+          <span style="font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal);">
+            PROFILE READINESS
+          </span>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-top: 0.25rem;">
+            Your Eligibility Snapshot
+          </h3>
+          <p style="color: var(--slate); font-size: 0.9rem; margin-top: 0.25rem;">
+            Keep your degree, year, and focus area updated to sharpen match accuracy.
+          </p>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.86rem; font-weight: 700; margin-bottom: 0.45rem;">
+            <span style="color: var(--navy);">Profile Completeness</span>
+            <span style="color: var(--teal);">85%</span>
+          </div>
+          <div style="width: 100%; height: 8px; background-color: var(--soft-white); border: 1px solid var(--border); border-radius: 999px; overflow: hidden;">
+            <div style="width: 85%; height: 100%; background-color: var(--teal); border-radius: 999px;"></div>
+          </div>
+        </div>
+
+        <div style="background-color: var(--soft-white); border: 1px solid var(--border); border-radius: 10px; padding: 0.95rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--slate); margin-bottom: 0.5rem;">
+            Upcoming Deadlines
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.88rem; padding-bottom: 0.45rem; margin-bottom: 0.45rem; border-bottom: 1px solid var(--border);">
+            <span style="font-weight: 600; color: var(--navy);">SWE Summer Intern</span>
+            <span style="font-weight: 700; color: var(--teal);">5d left</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.88rem;">
+            <span style="font-weight: 600; color: var(--navy);">AI &amp; FinTech Buildathon</span>
+            <span style="font-weight: 600; color: var(--navy);">Dec 04</span>
+          </div>
+        </div>
+
+        <a href="{{ url_for('explore') }}" class="btn btn-secondary" style="width: 100%;">
+          Browse All Listings
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PLATFORM FEATURES (3 Cards with Minimal Icons & Refined Headings) -->
+  <section id="platform-pillars" class="page-section" aria-label="Platform Features">
+    <div class="section-header">
+      <span class="badge-teal">Platform Pillars</span>
+      <h2 class="section-title">Built for Focused Student Momentum</h2>
+      <p class="section-subtitle">
+        Everything you need to move from scattered discovery to confident applications.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+      <div class="card feature-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <span class="icon-chip" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+          </span>
+          <span class="badge-teal">01</span>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">
+          All Your Opportunities. One Place.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.94rem;">
+          Browse internships, hackathons, scholarships, and research programmes without juggling dozens of tabs and scattered group links.
+        </p>
+      </div>
+
+      <div class="card feature-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <span class="icon-chip" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </span>
+          <span class="badge-teal">02</span>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">
+          Find Your Fit. Know Your Eligibility.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.94rem;">
+          Match listings against your degree, academic year, and skills so you spend your energy on opportunities built for your profile.
+        </p>
+      </div>
+
+      <div class="card feature-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <span class="icon-chip" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <polyline points="12 7 12 12 15 14"></polyline>
+            </svg>
+          </span>
+          <span class="badge-teal">03</span>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">
+          Deadlines Don't Wait. Neither Should You.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.94rem;">
+          Bookmark high-priority listings, monitor countdowns, and track your application status from initial interest to final selection.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. HOW IT WORKS (4 Clean Steps) -->
+  <section id="how-it-works" class="page-section" aria-label="How ScholarSync Works">
+    <div class="section-header">
+      <span class="badge-teal">How It Works</span>
+      <h2 class="section-title">A Simpler Path From Discovery to Selection</h2>
+      <p class="section-subtitle">
+        Get started in minutes and stay organized across every stage of your academic and career journey.
+      </p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="card feature-card">
+        <div class="step-number">1</div>
+        <h3 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">
+          Create your profile.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.92rem;">
+          Add your college, degree, academic year, and field of study to establish your baseline.
+        </p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="step-number">2</div>
+        <h3 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">
+          Discover opportunities.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.92rem;">
+          Explore curated internships, hackathons, scholarships, and research calls in one catalogue.
+        </p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="step-number">3</div>
+        <h3 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">
+          Check your eligibility.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.92rem;">
+          Review requirements, fit indicators, and closing dates before investing time in an application.
+        </p>
+      </div>
+
+      <div class="card feature-card">
+        <div class="step-number">4</div>
+        <h3 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">
+          Track your progress.
+        </h3>
+        <p style="color: var(--slate); font-size: 0.92rem;">
+          Save key opportunities and update your status as you move from interested to applied and beyond.
+        </p>
+      </div>
+    </div>
+  </section>
+{% endblock %}

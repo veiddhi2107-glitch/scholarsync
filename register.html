@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+
+{% block title %}Create Your Account — ScholarSync{% endblock %}
+
+{% block content %}
+  {% set selected_year = form_data.get("academic_year", 2) | int %}
+  {% set existing_college = form_data.get("college", "") %}
+
+  <style>
+    .auth-shell {
+      display: grid;
+      grid-template-columns: 0.92fr 1.28fr;
+      background-color: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 28px rgba(16, 28, 54, 0.08);
+    }
+
+    .auth-left {
+      background-color: var(--navy);
+      color: var(--white);
+      padding: clamp(2rem, 4vw, 3rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+
+    .auth-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+
+    .auth-brand span span {
+      color: var(--teal);
+    }
+
+    .auth-eyebrow {
+      color: var(--teal);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .auth-headline {
+      font-size: clamp(1.55rem, 2.6vw, 2.1rem);
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-bottom: 0.9rem;
+    }
+
+    .auth-subcopy {
+      color: #CBD5E1;
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+
+    .auth-highlights {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-top: 1.6rem;
+    }
+
+    .auth-highlight-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--white);
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+    }
+
+    .auth-highlight-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--teal);
+      flex-shrink: 0;
+    }
+
+    .auth-right {
+      background-color: var(--white);
+      padding: clamp(2rem, 4vw, 3rem);
+    }
+
+    .auth-form-header {
+      margin-bottom: 1.6rem;
+    }
+
+    .auth-form-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .auth-form-subtitle {
+      color: var(--slate);
+      font-size: 0.92rem;
+    }
+
+    .reg-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.1rem 1.15rem;
+    }
+
+    .reg-full {
+      grid-column: 1 / -1;
+    }
+
+    .reg-label {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.35rem;
+    }
+
+    .reg-input,
+    .reg-select {
+      width: 100%;
+      padding: 0.65rem 0.82rem;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-size: 0.94rem;
+      color: var(--navy);
+      background-color: var(--white);
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .reg-input::placeholder {
+      color: #94A3B8;
+    }
+
+    .reg-input:focus,
+    .reg-select:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+    }
+
+    .pw-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .pw-wrap .reg-input {
+      padding-right: 4.2rem;
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 0.45rem;
+      background-color: var(--soft-white);
+      color: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.28rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .pw-toggle:hover {
+      background-color: var(--light-teal);
+      border-color: var(--teal);
+      color: var(--navy);
+    }
+
+    .strength-meter {
+      margin-top: 0.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+    }
+
+    .strength-bars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.3rem;
+      flex: 1;
+      max-width: 130px;
+    }
+
+    .strength-seg {
+      height: 5px;
+      border-radius: 999px;
+      background-color: var(--border);
+      transition: background-color 0.16s ease;
+    }
+
+    .field-hint {
+      font-size: 0.78rem;
+      color: var(--slate);
+      margin-top: 0.32rem;
+    }
+
+    .field-error {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #B91C1C;
+      margin-top: 0.32rem;
+      display: none;
+    }
+
+    .auth-submit-btn {
+      width: 100%;
+      padding: 0.78rem 1.35rem;
+      font-size: 0.98rem;
+      border-radius: 9px;
+      background-color: var(--teal);
+      color: var(--white);
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .auth-submit-btn:hover {
+      background-color: var(--teal-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(20, 184, 166, 0.24);
+    }
+
+    .auth-footer-note {
+      margin-top: 1.25rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--slate);
+    }
+
+    .auth-footer-note a {
+      color: var(--navy);
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1.5px solid var(--teal);
+    }
+
+    @media (max-width: 900px) {
+      .auth-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .reg-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <section class="auth-shell" aria-label="Student Registration">
+    <!-- Left Panel: Deep Navy -->
+    <aside class="auth-left">
+      <div>
+        <div class="auth-brand">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background-color: var(--teal); display: inline-block;"></span>
+          <span style="display: inline-flex; gap: 0;">Scholar<span>Sync</span></span>
+        </div>
+
+        <div style="margin-top: 2rem;">
+          <div class="auth-eyebrow">YOUR NEXT CHAPTER STARTS HERE.</div>
+          <h1 class="auth-headline">
+            Create your profile. Discover opportunities. Make your ambitions count.
+          </h1>
+          <p class="auth-subcopy">
+            Your future has plenty of possibilities. Let's make sure you don't miss them.
+          </p>
+        </div>
+
+        <div class="auth-highlights">
+          <div class="auth-highlight-item">
+            <span class="auth-highlight-dot"></span>
+            <span>Discover opportunities.</span>
+          </div>
+          <div class="auth-highlight-item">
+            <span class="auth-highlight-dot"></span>
+            <span>Find your eligibility.</span>
+          </div>
+          <div class="auth-highlight-item">
+            <span class="auth-highlight-dot"></span>
+            <span>Track your progress.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 0.82rem; color: #94A3B8; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1rem;">
+        Built for Indian college students across engineering, sciences, commerce, and research.
+      </div>
+    </aside>
+
+    <!-- Right Panel: Clean White Registration Form -->
+    <div class="auth-right">
+      <div class="auth-form-header">
+        <span class="badge-teal" style="margin-bottom: 0.6rem;">Student Account</span>
+        <h2 class="auth-form-title">Get Started with ScholarSync</h2>
+        <p class="auth-form-subtitle">
+          Set up your academic profile to get tailored matches and deadline alerts.
+        </p>
+      </div>
+
+      <form id="registerForm" method="POST" action="{{ url_for('register') }}" novalidate>
+        <div class="reg-grid">
+          <!-- Full Name -->
+          <div>
+            <label class="reg-label" for="full_name">Full Name</label>
+            <input
+              class="reg-input"
+              id="full_name"
+              name="full_name"
+              type="text"
+              required
+              placeholder="Diya Verma"
+              value="{{ form_data.get('full_name', '') }}"
+            />
+          </div>
+
+          <!-- Email Address -->
+          <div>
+            <label class="reg-label" for="email">Email Address</label>
+            <input
+              class="reg-input"
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="diya@college.edu.in"
+              value="{{ form_data.get('email', '') }}"
+            />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label class="reg-label" for="password">Password</label>
+            <div class="pw-wrap">
+              <input
+                class="reg-input"
+                id="password"
+                name="password"
+                type="password"
+                required
+                minlength="6"
+                placeholder="At least 6 characters"
+              />
+              <button
+                type="button"
+                class="pw-toggle"
+                data-target="password"
+                aria-label="Show or hide password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="strength-meter" aria-live="polite">
+              <span id="strengthText" style="color: var(--slate); font-weight: 600;">Password strength: &mdash;</span>
+              <div class="strength-bars" aria-hidden="true">
+                <span class="strength-seg" id="seg1"></span>
+                <span class="strength-seg" id="seg2"></span>
+                <span class="strength-seg" id="seg3"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label class="reg-label" for="confirm_password">Confirm Password</label>
+            <div class="pw-wrap">
+              <input
+                class="reg-input"
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                required
+                minlength="6"
+                placeholder="Re-enter your password"
+              />
+              <button
+                type="button"
+                class="pw-toggle"
+                data-target="confirm_password"
+                aria-label="Show or hide confirm password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="field-error" id="passwordMatchError">Passwords do not match.</div>
+          </div>
+
+          <!-- State Selector + College / University Dropdown -->
+          <div>
+            <label class="reg-label" for="state_select">State / Union Territory</label>
+            <select class="reg-select" id="state_select">
+              <option value="">Select State / UT</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="reg-label" for="college_select">College / University</label>
+            <select class="reg-select" id="college_select">
+              <option value="">Select State first or choose below</option>
+            </select>
+          </div>
+
+          <div class="reg-full" id="customCollegeRow" style="display: none;">
+            <label class="reg-label" for="custom_college_input">Enter College / University Name</label>
+            <input
+              class="reg-input"
+              id="custom_college_input"
+              type="text"
+              placeholder="e.g., Indira Gandhi Institute of Technology / BPUT"
+              value="{{ existing_college }}"
+            />
+          </div>
+
+          <input type="hidden" id="college" name="college" value="{{ existing_college }}" />
+          <div class="reg-full field-hint" style="margin-top: -0.6rem;">
+            Choose a state to browse colleges &amp; universities, or pick <strong>Other (Type manually)</strong> to enter yours.
+          </div>
+
+          <!-- Degree -->
+          <div>
+            <label class="reg-label" for="degree">Degree</label>
+            <input
+              class="reg-input"
+              id="degree"
+              name="degree"
+              type="text"
+              required
+              placeholder="e.g., B.Tech, B.Sc., BCA, B.Com"
+              value="{{ form_data.get('degree', '') }}"
+            />
+          </div>
+
+          <!-- Academic Year -->
+          <div>
+            <label class="reg-label" for="academic_year">Academic Year</label>
+            <select class="reg-select" id="academic_year" name="academic_year" required>
+              {% for yr in [1, 2, 3, 4, 5] %}
+                <option value="{{ yr }}" {% if selected_year == yr %}selected{% endif %}>
+                  Year {{ yr }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Field of Study -->
+          <div class="reg-full">
+            <label class="reg-label" for="field_of_study">Field of Study</label>
+            <input
+              class="reg-input"
+              id="field_of_study"
+              name="field_of_study"
+              type="text"
+              required
+              placeholder="e.g., Computer Science & Engineering, Electronics, Data Science"
+              value="{{ form_data.get('field_of_study', '') }}"
+            />
+          </div>
+
+          <div class="reg-full field-error" id="formClientError"></div>
+
+          <!-- Submit Button -->
+          <div class="reg-full" style="margin-top: 0.35rem;">
+            <button type="submit" class="auth-submit-btn">Create My Account &rarr;</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="auth-footer-note">
+        Already have an account? <a href="{{ url_for('login') }}">Sign In</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const COLLEGES_BY_STATE = {
+        "Odisha": [
+          "College of Engineering and Technology (OUTR), Bhubaneswar",
+          "Silicon Institute of Technology, Bhubaneswar",
+          "Gandhi Institute for Technological Advancement (GITA), Bhubaneswar",
+          "KIIT Deemed to be University, Bhubaneswar",
+          "SOA (Siksha 'O' Anusandhan) University, Bhubaneswar",
+          "NIT Rourkela, Rourkela",
+          "VSSUT Burla, Sambalpur",
+          "IIIT Bhubaneswar, Bhubaneswar"
+        ],
+        "Maharashtra": [
+          "Sardar Patel Institute of Technology (SPIT), Mumbai",
+          "Walchand College of Engineering, Sangli",
+          "PICT (Pune Institute of Computer Technology), Pune",
+          "VJTI Mumbai, Mumbai",
+          "COEP Technological University, Pune",
+          "University of Mumbai, Mumbai",
+          "Savitribai Phule Pune University, Pune"
+        ],
+        "Karnataka": [
+          "BMS College of Engineering, Bengaluru",
+          "MS Ramaiah Institute of Technology, Bengaluru",
+          "PES University, Bengaluru",
+          "RV College of Engineering, Bengaluru",
+          "NITK Surathkal, Mangalore",
+          "Manipal Institute of Technology, Manipal",
+          "Visvesvaraya Technological University (VTU), Belagavi"
+        ],
+        "Tamil Nadu": [
+          "SSN College of Engineering, Chennai",
+          "Thiagarajar College of Engineering, Madurai",
+          "PSG College of Technology, Coimbatore",
+          "College of Engineering, Guindy (Anna University), Chennai",
+          "NIT Tiruchirappalli, Tiruchirappalli",
+          "VIT Vellore, Vellore",
+          "SRM Institute of Science and Technology, Chennai"
+        ],
+        "Delhi": [
+          "Netaji Subhas University of Technology (NSUT), New Delhi",
+          "Indraprastha Institute of Information Technology (IIIT-D), New Delhi",
+          "Delhi Technological University (DTU), New Delhi",
+          "University of Delhi (DU), New Delhi",
+          "Jamia Millia Islamia, New Delhi"
+        ],
+        "Telangana": [
+          "CVR College of Engineering, Hyderabad",
+          "Vasavi College of Engineering, Hyderabad",
+          "CBIT (Chaitanya Bharathi Institute of Technology), Hyderabad",
+          "IIIT Hyderabad, Hyderabad",
+          "JNTU Hyderabad, Hyderabad",
+          "University of Hyderabad, Hyderabad"
+        ],
+        "West Bengal": [
+          "Heritage Institute of Technology, Kolkata",
+          "Institute of Engineering & Management (IEM), Kolkata",
+          "Jadavpur University, Kolkata",
+          "IIEST Shibpur, Howrah",
+          "University of Calcutta, Kolkata"
+        ],
+        "Uttar Pradesh": [
+          "ABES Engineering College, Ghaziabad",
+          "GL Bajaj Institute of Technology and Management, Greater Noida",
+          "MNNIT Allahabad, Prayagraj",
+          "IIT (BHU) Varanasi, Varanasi",
+          "Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow"
+        ],
+        "Gujarat": [
+          "Dhirubhai Ambani Institute of Information and Communication Technology (DA-IICT), Gandhinagar",
+          "Nirma University, Ahmedabad",
+          "SVNIT Surat, Surat",
+          "Gujarat Technological University (GTU), Ahmedabad"
+        ],
+        "Rajasthan": [
+          "LNMIIT, Jaipur",
+          "MNIT Jaipur, Jaipur",
+          "BITS Pilani, Pilani",
+          "University of Rajasthan, Jaipur"
+        ],
+        "Kerala": [
+          "Model Engineering College (MEC), Kochi",
+          "College of Engineering Trivandrum (CET), Thiruvananthapuram",
+          "NIT Calicut, Kozhikode",
+          "Cochin University of Science and Technology (CUSAT), Kochi"
+        ],
+        "Other States & UTs": [
+          "PEC Chandigarh, Chandigarh",
+          "Thapar Institute of Engineering & Technology, Patiala",
+          "IIT Guwahati, Guwahati",
+          "Other College / University"
+        ]
+      };
+
+      document.querySelectorAll(".pw-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const input = document.getElementById(btn.dataset.target);
+          if (!input) return;
+          const isPassword = input.type === "password";
+          input.type = isPassword ? "text" : "password";
+          btn.textContent = isPassword ? "Hide" : "Show";
+        });
+      });
+
+      const pwInput = document.getElementById("password");
+      const confirmInput = document.getElementById("confirm_password");
+      const strengthText = document.getElementById("strengthText");
+      const segs = [
+        document.getElementById("seg1"),
+        document.getElementById("seg2"),
+        document.getElementById("seg3")
+      ];
+      const matchError = document.getElementById("passwordMatchError");
+
+      function updateStrength() {
+        const val = pwInput.value || "";
+        let score = 0;
+        if (val.length >= 6) score += 1;
+        if (val.length >= 9 && /[A-Z]/.test(val) && /[0-9]/.test(val)) score += 1;
+        if (val.length >= 10 && /[^A-Za-z0-9]/.test(val)) score += 1;
+
+        const colors = ["#E2E8F0", "#F59E0B", "#14B8A6", "#0D9488"];
+        const labels = ["Too short", "Fair", "Good", "Strong"];
+
+        segs.forEach((seg, idx) => {
+          seg.style.backgroundColor = idx < score ? colors[score] : "#E2E8F0";
+        });
+
+        if (!val) {
+          strengthText.textContent = "Password strength: —";
+          strengthText.style.color = "#64748B";
+        } else {
+          strengthText.textContent = "Strength: " + labels[score];
+          strengthText.style.color = score >= 2 ? "#0D9488" : "#B45309";
+        }
+      }
+
+      function checkPasswordMatch() {
+        if (!confirmInput.value) {
+          matchError.style.display = "none";
+          return true;
+        }
+        const matches = pwInput.value === confirmInput.value;
+        matchError.style.display = matches ? "none" : "block";
+        return matches;
+      }
+
+      pwInput.addEventListener("input", () => {
+        updateStrength();
+        checkPasswordMatch();
+      });
+      confirmInput.addEventListener("input", checkPasswordMatch);
+
+      const stateSelect = document.getElementById("state_select");
+      const collegeSelect = document.getElementById("college_select");
+      const customRow = document.getElementById("customCollegeRow");
+      const customInput = document.getElementById("custom_college_input");
+      const hiddenCollege = document.getElementById("college");
+
+      Object.keys(COLLEGES_BY_STATE).forEach((stateName) => {
+        const opt = document.createElement("option");
+        opt.value = stateName;
+        opt.textContent = stateName;
+        stateSelect.appendChild(opt);
+      });
+
+      function populateColleges(stateName, presetCollege) {
+        collegeSelect.innerHTML = "";
+        if (!stateName || !COLLEGES_BY_STATE[stateName]) {
+          const defOpt = document.createElement("option");
+          defOpt.value = "";
+          defOpt.textContent = "Select State first or choose custom";
+          collegeSelect.appendChild(defOpt);
+        } else {
+          const promptOpt = document.createElement("option");
+          promptOpt.value = "";
+          promptOpt.textContent = "Select College / University";
+          collegeSelect.appendChild(promptOpt);
+
+          COLLEGES_BY_STATE[stateName].forEach((inst) => {
+            const opt = document.createElement("option");
+            opt.value = inst;
+            opt.textContent = inst;
+            collegeSelect.appendChild(opt);
+          });
+        }
+
+        const customOpt = document.createElement("option");
+        customOpt.value = "__CUSTOM__";
+        customOpt.textContent = "Other (Type manually)";
+        collegeSelect.appendChild(customOpt);
+
+        if (presetCollege) {
+          const match = Array.from(collegeSelect.options).find((o) => o.value === presetCollege);
+          if (match) {
+            collegeSelect.value = presetCollege;
+            customRow.style.display = "none";
+            hiddenCollege.value = presetCollege;
+            return;
+          }
+          collegeSelect.value = "__CUSTOM__";
+          customRow.style.display = "block";
+          customInput.value = presetCollege;
+          hiddenCollege.value = presetCollege;
+        }
+      }
+
+      if (hiddenCollege.value) {
+        let foundState = "";
+        for (const [st, list] of Object.entries(COLLEGES_BY_STATE)) {
+          if (list.includes(hiddenCollege.value)) {
+            foundState = st;
+            break;
+          }
+        }
+        if (foundState) {
+          stateSelect.value = foundState;
+          populateColleges(foundState, hiddenCollege.value);
+        } else {
+          populateColleges("", hiddenCollege.value);
+        }
+      } else {
+        populateColleges("", "");
+      }
+
+      stateSelect.addEventListener("change", () => {
+        populateColleges(stateSelect.value, "");
+        if (collegeSelect.value !== "__CUSTOM__") {
+          customRow.style.display = "none";
+          hiddenCollege.value = collegeSelect.value;
+        }
+      });
+
+      collegeSelect.addEventListener("change", () => {
+        if (collegeSelect.value === "__CUSTOM__") {
+          customRow.style.display = "block";
+          hiddenCollege.value = customInput.value.trim();
+          customInput.focus();
+        } else {
+          customRow.style.display = "none";
+          hiddenCollege.value = collegeSelect.value;
+        }
+      });
+
+      customInput.addEventListener("input", () => {
+        if (collegeSelect.value === "__CUSTOM__") {
+          hiddenCollege.value = customInput.value.trim();
+        }
+      });
+
+      const form = document.getElementById("registerForm");
+      const formClientError = document.getElementById("formClientError");
+
+      form.addEventListener("submit", (e) => {
+        const currentCollege =
+          collegeSelect.value === "__CUSTOM__"
+            ? customInput.value.trim()
+            : (collegeSelect.value || hiddenCollege.value || "").trim();
+        hiddenCollege.value = currentCollege;
+
+        const nameVal = document.getElementById("full_name").value.trim();
+        const emailVal = document.getElementById("email").value.trim();
+        const degreeVal = document.getElementById("degree").value.trim();
+        const fieldVal = document.getElementById("field_of_study").value.trim();
+
+        let msg = "";
+        if (!nameVal || !emailVal || !currentCollege || !degreeVal || !fieldVal) {
+          msg = "Please complete all required fields, including your college or university.";
+        } else if (pwInput.value.length < 6) {
+          msg = "Password must be at least 6 characters long.";
+        } else if (pwInput.value !== confirmInput.value) {
+          msg = "Passwords do not match.";
+          matchError.style.display = "block";
+        }
+
+        if (msg) {
+          e.preventDefault();
+          formClientError.textContent = msg;
+          formClientError.style.display = "block";
+        } else {
+          formClientError.style.display = "none";
+        }
+      });
+    })();
+  </script>
+{% endblock %}

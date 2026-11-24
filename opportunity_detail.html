@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}{{ opp["title"] }} — ScholarSync{% endblock %}
+
+{% block content %}
+  <style>
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(290px, 1fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .detail-meta-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0 1.25rem;
+    }
+
+    .detail-meta-box {
+      background-color: var(--soft-white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+    }
+
+    .detail-meta-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--slate);
+    }
+
+    .detail-meta-val {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 0.2rem;
+    }
+
+    .elig-pill {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.22rem 0.68rem;
+      border-radius: 999px;
+    }
+
+    .elig-pill.eligible {
+      background-color: var(--light-teal);
+      color: var(--navy);
+    }
+
+    .elig-pill.potential {
+      background-color: #FEF3C7;
+      color: #92400E;
+    }
+
+    .elig-pill.insufficient {
+      background-color: #E2E8F0;
+      color: #334155;
+    }
+
+    .elig-pill.not-eligible {
+      background-color: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.25rem;
+    }
+
+    .field-input,
+    .field-select,
+    .field-textarea {
+      width: 100%;
+      padding: 0.55rem 0.72rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--navy);
+      background-color: var(--white);
+      font-family: inherit;
+    }
+
+    @media (max-width: 880px) {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <div style="margin-bottom: 1rem;">
+    <a href="{{ url_for('explore') }}" style="color: var(--navy); font-weight: 600; text-decoration: none; font-size: 0.9rem;">
+      &larr; Back to Opportunities
+    </a>
+  </div>
+
+  <div class="detail-grid">
+    <!-- Left Column: Opportunity Overview & Eligibility -->
+    <div style="display: grid; gap: 1.25rem;">
+      <section class="card">
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <span class="badge-teal">{{ opp["category"] }}</span>
+          {% if opp["is_verified"] %}
+            <span class="badge-teal" style="background-color: var(--soft-white); border: 1px solid var(--border);">Verified</span>
+          {% endif %}
+        </div>
+
+        <h1 style="font-size: clamp(1.45rem, 2.8vw, 1.95rem); font-weight: 800; color: var(--navy); margin-top: 0.55rem;">
+          {{ opp["title"] }}
+        </h1>
+        <p style="color: var(--slate); font-size: 0.96rem; font-weight: 600; margin-top: 0.2rem;">
+          {{ opp["organization"] }}
+        </p>
+
+        <div class="detail-meta-list">
+          <div class="detail-meta-box">
+            <div class="detail-meta-label">Deadline</div>
+            <div class="detail-meta-val">{{ opp["deadline"] or "Not specified" }}</div>
+          </div>
+          <div class="detail-meta-box">
+            <div class="detail-meta-label">Mode &amp; Location</div>
+            <div class="detail-meta-val">{{ opp["mode"] or "Flexible" }}{% if opp["location"] %} &middot; {{ opp["location"] }}{% endif %}</div>
+          </div>
+          <div class="detail-meta-box">
+            <div class="detail-meta-label">Compensation / Stipend</div>
+            <div class="detail-meta-val">{{ opp["stipend"] or "Not specified" }}</div>
+          </div>
+          <div class="detail-meta-box">
+            <div class="detail-meta-label">Target Degree &amp; Year</div>
+            <div class="detail-meta-val">
+              {{ opp["target_degree"] or "Any" }} &middot; Year {{ opp["min_year"] if opp["min_year"] is not none else 1 }}–{{ opp["max_year"] if opp["max_year"] is not none else 5 }}
+            </div>
+          </div>
+        </div>
+
+        <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">Overview</h2>
+        <p style="color: var(--slate); font-size: 0.94rem; white-space: pre-line;">{{ opp["description"] }}</p>
+
+        {% if opp["required_skills"] %}
+          <div style="margin-top: 1rem;">
+            <strong style="font-size: 0.88rem; color: var(--navy);">Required Skills:</strong>
+            <span style="font-size: 0.9rem; color: var(--slate);">{{ opp["required_skills"] }}</span>
+          </div>
+        {% endif %}
+
+        {% if opp["eligibility_text"] %}
+          <div style="margin-top: 0.55rem;">
+            <strong style="font-size: 0.88rem; color: var(--navy);">Eligibility Notes:</strong>
+            <span style="font-size: 0.9rem; color: var(--slate);">{{ opp["eligibility_text"] }}</span>
+          </div>
+        {% endif %}
+
+        {% if opp["apply_url"] %}
+          <div style="margin-top: 1.35rem;">
+            <a href="{{ opp['apply_url'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+              Apply on Official Portal &rarr;
+            </a>
+          </div>
+        {% endif %}
+      </section>
+
+      {% if eligibility_eval %}
+        <section class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+            <h2 style="font-size: 1.12rem; font-weight: 700; color: var(--navy);">Smart Eligibility Breakdown</h2>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="elig-pill {{ eligibility_eval.badge_tone }}">{{ eligibility_eval.status }}</span>
+              <span style="font-size: 0.86rem; font-weight: 700; color: var(--navy);">{{ eligibility_eval.match_percent }}% Match</span>
+            </div>
+          </div>
+
+          <ul style="margin-left: 1.15rem; display: grid; gap: 0.35rem; font-size: 0.9rem; color: var(--slate);">
+            {% for blk in eligibility_eval.blockers %}
+              <li style="color: #991B1B; font-weight: 600;">{{ blk }}</li>
+            {% endfor %}
+            {% for rsn in eligibility_eval.reasons %}
+              <li>{{ rsn }}</li>
+            {% endfor %}
+            {% for miss in eligibility_eval.missing_profile %}
+              <li style="color: #92400E;">{{ miss }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Bookmark & Application Tracker -->
+    <aside class="card" style="display: grid; gap: 1.15rem;">
+      {% if current_user %}
+        <div>
+          <h2 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">Save Opportunity</h2>
+          <p style="font-size: 0.86rem; color: var(--slate); margin-bottom: 0.75rem;">
+            Saved listings appear on your dashboard and trigger deadline alerts as closing dates approach.
+          </p>
+          <form method="POST" action="{{ url_for('toggle_save_opportunity', opp_id=opp['id']) }}">
+            <input type="hidden" name="next" value="{{ url_for('opportunity_detail', opp_id=opp['id']) }}" />
+            <button type="submit" class="btn {% if is_saved %}btn-secondary{% else %}btn-primary{% endif %}" style="width: 100%;">
+              {% if is_saved %}Saved (Click to Remove){% else %}Save Opportunity{% endif %}
+            </button>
+          </form>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border);" />
+
+        <div>
+          <h2 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.25rem;">Track Application</h2>
+          <p style="font-size: 0.85rem; color: var(--slate); margin-bottom: 0.85rem;">
+            Current status: <strong>{{ current_status or "Not tracked yet" }}</strong>
+          </p>
+
+          <form method="POST" action="{{ url_for('track_opportunity', opp_id=opp['id']) }}" style="display: grid; gap: 0.75rem;">
+            <div>
+              <label class="field-label" for="status">Application Status</label>
+              <select class="field-select" id="status" name="status">
+                {% for st in all_statuses %}
+                  <option value="{{ st }}" {% if current_status == st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="field-label" for="application_date">Application Date</label>
+              <input
+                class="field-input"
+                id="application_date"
+                name="application_date"
+                type="date"
+                value="{{ current_app_date }}"
+              />
+            </div>
+
+            <div>
+              <label class="field-label" for="notes">Personal Notes</label>
+              <textarea
+                class="field-textarea"
+                id="notes"
+                name="notes"
+                rows="3"
+                placeholder="Interview dates, eligibility reminders, application links..."
+              >{{ current_notes }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Save Tracking Details</button>
+          </form>
+        </div>
+      {% else %}
+        <div>
+          <h2 style="font-size: 1.08rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem;">Track &amp; Save</h2>
+          <p style="font-size: 0.88rem; color: var(--slate); margin-bottom: 0.9rem;">
+            Sign in to bookmark this listing, track your application status, record dates/notes, and view personalized eligibility.
+          </p>
+          <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%;">Sign In to Continue</a>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock %}

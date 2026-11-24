@@ -1,0 +1,964 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard — ScholarSync{% endblock %}
+
+{% block content %}
+  <style>
+    .dash-shell {
+      display: grid;
+      grid-template-columns: 245px minmax(0, 1fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .dash-sidebar {
+      background-color: var(--navy);
+      color: var(--white);
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 1.25rem;
+    }
+
+    .dash-sidebar-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      margin: 1rem 0 0.45rem;
+      padding: 0 0.65rem;
+    }
+
+    .dash-sidebar-label:first-child {
+      margin-top: 0.25rem;
+    }
+
+    .dash-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .dash-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.58rem 0.75rem;
+      border-radius: 8px;
+      color: #CBD5E1;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .dash-nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.07);
+      color: var(--white);
+    }
+
+    .dash-nav-link.active {
+      background-color: rgba(20, 184, 166, 0.16);
+      color: var(--white);
+      font-weight: 600;
+      border-left: 3px solid var(--teal);
+    }
+
+    .dash-pill-count {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: var(--white);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+    }
+
+    .dash-pill-count.teal {
+      background-color: var(--teal);
+      color: var(--white);
+    }
+
+    .dash-main {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      min-width: 0;
+    }
+
+    .welcome-banner {
+      background-color: var(--navy);
+      color: var(--white);
+      border-radius: 12px;
+      padding: 1.65rem 1.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.15;
+      margin-top: 0.25rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 9px;
+      background-color: var(--soft-white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--teal);
+      border-radius: 999px;
+    }
+
+    .section-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .section-heading {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .item-row {
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background-color: var(--soft-white);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .item-row:hover {
+      border-color: rgba(20, 184, 166, 0.45);
+      box-shadow: 0 3px 10px rgba(16, 28, 54, 0.04);
+    }
+
+    .rec-card {
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background-color: var(--soft-white);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .rec-card:hover {
+      border-color: rgba(20, 184, 166, 0.45);
+      box-shadow: 0 3px 10px rgba(16, 28, 54, 0.04);
+    }
+
+    .rec-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .rec-title-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--navy);
+      text-align: left;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .rec-title-btn:hover {
+      color: var(--teal-hover);
+    }
+
+    .rec-why-btn {
+      background-color: var(--white);
+      color: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.42rem 0.78rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .rec-why-btn:hover {
+      border-color: var(--teal);
+      background-color: var(--light-teal);
+    }
+
+    .rec-details-panel {
+      display: none;
+      margin-top: 0.85rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .rec-details-panel.open {
+      display: block;
+    }
+
+    .elig-pill {
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+    }
+
+    .elig-pill.eligible {
+      background-color: var(--light-teal);
+      color: var(--navy);
+    }
+
+    .elig-pill.potential {
+      background-color: #FEF3C7;
+      color: #92400E;
+    }
+
+    .elig-pill.insufficient {
+      background-color: #E2E8F0;
+      color: #334155;
+    }
+
+    .elig-pill.not-eligible {
+      background-color: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .reason-list {
+      margin: 0.25rem 0 0 1.15rem;
+      padding: 0;
+      font-size: 0.84rem;
+      color: var(--slate);
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .tag-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.6rem;
+    }
+
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background-color: var(--light-teal);
+      color: var(--navy);
+      border: 1px solid rgba(20, 184, 166, 0.35);
+      border-radius: 999px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.83rem;
+      font-weight: 600;
+    }
+
+    .tag-chip button {
+      background: none;
+      border: none;
+      color: var(--navy);
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0 0.15rem;
+      line-height: 1;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .status-box {
+      background-color: var(--soft-white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+    }
+
+    .status-box-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--slate);
+    }
+
+    .status-box-num {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 0.1rem;
+    }
+
+    .app-edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      min-width: 240px;
+    }
+
+    .app-edit-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.3rem;
+    }
+
+    .field-input,
+    .field-select {
+      width: 100%;
+      padding: 0.58rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.93rem;
+      background-color: var(--white);
+      color: var(--navy);
+    }
+
+    @media (max-width: 880px) {
+      .dash-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .dash-sidebar {
+        position: static;
+      }
+
+      .dash-nav-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .dash-nav-link {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.86rem;
+      }
+    }
+  </style>
+
+  <div class="dash-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" aria-label="Dashboard Navigation">
+      <div class="dash-sidebar-label">Student Workspace</div>
+      <nav class="dash-nav-list">
+        <a class="dash-nav-link {% if active_tab == 'overview' %}active{% endif %}" href="{{ url_for('dashboard', tab='overview') }}">
+          <span>Overview</span>
+        </a>
+        <a class="dash-nav-link {% if active_tab == 'recommended' %}active{% endif %}" href="{{ url_for('dashboard', tab='recommended') }}">
+          <span>Recommended</span>
+          <span class="dash-pill-count">{{ recommended_items|length }}</span>
+        </a>
+        <a class="dash-nav-link {% if active_tab == 'deadlines' %}active{% endif %}" href="{{ url_for('dashboard', tab='deadlines') }}">
+          <span>Deadlines</span>
+          <span class="dash-pill-count">{{ upcoming_deadlines|length }}</span>
+        </a>
+        <a class="dash-nav-link {% if active_tab == 'applications' %}active{% endif %}" href="{{ url_for('dashboard', tab='applications') }}">
+          <span>My Applications</span>
+          <span class="dash-pill-count">{{ total_applications }}</span>
+        </a>
+        <a class="dash-nav-link {% if active_tab == 'saved' %}active{% endif %}" href="{{ url_for('dashboard', tab='saved') }}">
+          <span>Saved</span>
+          <span class="dash-pill-count">{{ saved_count }}</span>
+        </a>
+        <a class="dash-nav-link {% if active_tab == 'profile' %}active{% endif %}" href="{{ url_for('dashboard', tab='profile') }}">
+          <span>My Profile</span>
+          <span class="dash-pill-count teal">{{ profile_completion.percent }}%</span>
+        </a>
+        <a class="dash-nav-link {% if active_tab == 'notifications' %}active{% endif %}" href="{{ url_for('dashboard', tab='notifications') }}">
+          <span>Notifications</span>
+          {% if unread_notifications > 0 %}
+            <span class="dash-pill-count teal">{{ unread_notifications }}</span>
+          {% else %}
+            <span class="dash-pill-count">0</span>
+          {% endif %}
+        </a>
+      </nav>
+
+      <div class="dash-sidebar-label">Quick Navigation</div>
+      <div class="dash-nav-list">
+        <a class="dash-nav-link" href="{{ url_for('explore') }}">
+          <span>Explore Opportunities &rarr;</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Dashboard Content -->
+    <div class="dash-main">
+      <!-- 1. Personalized Welcome Section -->
+      <section class="welcome-banner">
+        <div>
+          <div style="color: var(--teal); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+            STUDENT DASHBOARD
+          </div>
+          <h1 style="font-size: clamp(1.45rem, 2.8vw, 1.95rem); font-weight: 800; margin-top: 0.2rem;">
+            Welcome back, {{ user["full_name"] }}
+          </h1>
+          <p style="color: #CBD5E1; font-size: 0.93rem; margin-top: 0.25rem;">
+            {{ user["degree"] }} &middot; Year {{ user["academic_year"] }}{% if user["graduation_year"] %} (Class of {{ user["graduation_year"] }}){% endif %} &middot; {{ user["field_of_study"] }} &middot; {{ user["college"] }}
+          </p>
+          <p style="color: var(--white); font-size: 0.9rem; font-weight: 500; margin-top: 0.55rem;">
+            Consistency compounds—review upcoming deadlines and focus on opportunities that match your profile.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+          <a href="{{ url_for('explore') }}" class="btn btn-primary">Explore Opportunities</a>
+          <a href="{{ url_for('dashboard', tab='profile') }}" class="btn btn-outline-light">Edit Profile</a>
+        </div>
+      </section>
+
+      <!-- Key Counts Row -->
+      <section class="stats-grid" aria-label="Summary Counts">
+        <div class="card">
+          <div style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">Profile Completion</div>
+          <div class="stat-value" style="color: var(--teal);">{{ profile_completion.percent }}%</div>
+        </div>
+        <div class="card">
+          <div style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">Upcoming Deadlines</div>
+          <div class="stat-value">{{ upcoming_deadlines|length }}</div>
+        </div>
+        <div class="card">
+          <div style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">Total Applications</div>
+          <div class="stat-value">{{ total_applications }}</div>
+        </div>
+        <div class="card">
+          <div style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">Saved Opportunities</div>
+          <div class="stat-value">{{ saved_count }}</div>
+        </div>
+      </section>
+
+      <!-- 2. Profile Completion Card -->
+      {% if active_tab in ['overview', 'profile'] %}
+        <section class="card" id="profile-completion">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Profile Completion</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                {{ profile_completion.completed }} of {{ profile_completion.total }} academic &amp; preference fields completed.
+              </p>
+            </div>
+            <span class="badge-teal">{{ profile_completion.percent }}% Complete</span>
+          </div>
+
+          <div class="progress-track" style="margin-bottom: 0.9rem;">
+            <div class="progress-fill" style="width: {{ profile_completion.percent }}%;"></div>
+          </div>
+
+          {% if profile_completion.missing %}
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <div style="font-size: 0.88rem; color: var(--slate);">
+                <strong style="color: var(--navy);">Missing details:</strong> {{ profile_completion.missing | join(", ") }}
+              </div>
+              <a href="{{ url_for('dashboard', tab='profile') }}" class="btn btn-secondary" style="padding: 0.45rem 0.9rem; font-size: 0.86rem;">
+                Complete Missing Info
+              </a>
+            </div>
+          {% else %}
+            <div style="font-size: 0.88rem; color: var(--navy); font-weight: 600;">
+              Your academic profile, graduation year, skills, and interests are complete.
+            </div>
+          {% endif %}
+        </section>
+      {% endif %}
+
+      <!-- 3. Recommended Opportunities -->
+      {% if active_tab in ['overview', 'recommended'] %}
+        <section class="card" id="recommended-opportunities">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Recommended Opportunities</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Click an opportunity or &ldquo;Why this matches&rdquo; to view eligibility points, or open full details.
+              </p>
+            </div>
+            <a href="{{ url_for('explore') }}" style="color: var(--teal); font-weight: 600; font-size: 0.9rem; text-decoration: none;">
+              View all &rarr;
+            </a>
+          </div>
+
+          {% set rec_slice = recommended_items if active_tab == 'recommended' else recommended_items[:4] %}
+          {% if rec_slice %}
+            <div style="display: grid; gap: 0.85rem;">
+              {% for item in rec_slice %}
+                {% set opp = item.opp %}
+                {% set ev = item.eval %}
+                {% set panel_id = "rec-panel-" ~ opp["id"] %}
+                <div class="rec-card">
+                  <div class="rec-card-head">
+                    <div style="min-width: 240px; flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+                        <span class="badge-teal" style="font-size: 0.76rem; padding: 0.15rem 0.55rem;">{{ opp["category"] }}</span>
+                        <span class="elig-pill {{ ev.badge_tone }}">{{ ev.status }}</span>
+                        <span style="font-size: 0.78rem; font-weight: 700; color: var(--navy);">{{ ev.match_percent }}% Match</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="rec-title-btn"
+                        data-target="{{ panel_id }}"
+                        aria-expanded="false"
+                        aria-controls="{{ panel_id }}"
+                      >
+                        {{ opp["title"] }}
+                      </button>
+
+                      <div style="color: var(--slate); font-size: 0.86rem; margin-top: 0.15rem;">
+                        {{ opp["organization"] }} &middot; Deadline: {{ opp["deadline"] }} ({{ item.countdown }})
+                      </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                      <button
+                        type="button"
+                        class="rec-why-btn"
+                        data-target="{{ panel_id }}"
+                        aria-expanded="false"
+                        aria-controls="{{ panel_id }}"
+                      >
+                        Why this matches &#9662;
+                      </button>
+                      <a href="{{ url_for('opportunity_detail', opp_id=opp['id']) }}" class="btn btn-secondary" style="padding: 0.42rem 0.85rem; font-size: 0.85rem;">
+                        View Details
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="rec-details-panel" id="{{ panel_id }}">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--navy); margin-bottom: 0.25rem;">
+                      Eligibility &amp; Match Breakdown
+                    </div>
+                    <ul class="reason-list">
+                      {% for blk in ev.blockers %}
+                        <li style="color: #991B1B;">{{ blk }}</li>
+                      {% endfor %}
+                      {% for rsn in ev.reasons %}
+                        <li>{{ rsn }}</li>
+                      {% endfor %}
+                      {% for miss in ev.missing_profile %}
+                        <li style="color: #92400E;">{{ miss }}</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--slate); font-size: 0.92rem;">No opportunities available in the database yet.</p>
+          {% endif %}
+        </section>
+      {% endif %}
+
+      <!-- 4. Upcoming Deadlines -->
+      {% if active_tab in ['overview', 'deadlines'] %}
+        <section class="card" id="upcoming-deadlines">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Upcoming Deadlines</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Open listings ordered by soonest closing date.
+              </p>
+            </div>
+          </div>
+
+          {% set dl_slice = upcoming_deadlines if active_tab == 'deadlines' else upcoming_deadlines[:5] %}
+          {% if dl_slice %}
+            <div style="display: grid; gap: 0.75rem;">
+              {% for entry in dl_slice %}
+                {% set opp = entry.opp %}
+                <div class="item-row" style="align-items: center;">
+                  <div>
+                    <a href="{{ url_for('opportunity_detail', opp_id=opp['id']) }}" style="font-weight: 700; color: var(--navy); text-decoration: none;">
+                      {{ opp["title"] }}
+                    </a>
+                    <div style="font-size: 0.86rem; color: var(--slate);">
+                      {{ opp["organization"] }} &middot; {{ opp["category"] }} &middot; Date: {{ opp["deadline"] }}
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <span class="badge-teal">{{ entry.countdown }}</span>
+                    <a href="{{ url_for('opportunity_detail', opp_id=opp['id']) }}" class="btn btn-primary" style="padding: 0.42rem 0.8rem; font-size: 0.84rem;">
+                      Open
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--slate); font-size: 0.92rem;">No upcoming deadlines found.</p>
+          {% endif %}
+        </section>
+      {% endif %}
+
+      <!-- 5. Application Tracker -->
+      {% if active_tab in ['overview', 'applications'] %}
+        <section class="card" id="application-tracker">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Application Tracker</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Total applications tracked: <strong>{{ total_applications }}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div class="status-grid">
+            {% for st in application_statuses %}
+              <div class="status-box">
+                <div class="status-box-label">{{ st }}</div>
+                <div class="status-box-num">{{ status_counts[st] }}</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          {% if applications %}
+            <div style="display: grid; gap: 0.75rem;">
+              {% for app_row in applications %}
+                <div class="item-row">
+                  <div style="min-width: 230px; flex: 1;">
+                    <a href="{{ url_for('opportunity_detail', opp_id=app_row['opportunity_id']) }}" style="font-weight: 700; color: var(--navy); text-decoration: none;">
+                      {{ app_row["title"] }}
+                    </a>
+                    <div style="font-size: 0.86rem; color: var(--slate); margin-top: 0.15rem;">
+                      {{ app_row["organization"] }} &middot; {{ app_row["category"] }} &middot; Deadline: {{ app_row["deadline"] }}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--navy); margin-top: 0.25rem;">
+                      <strong>Status:</strong> {{ app_row["status"] }}
+                      {% if app_row["application_date"] %} &middot; <strong>Applied / Date:</strong> {{ app_row["application_date"] }}{% endif %}
+                    </div>
+                    {% if app_row["notes"] %}
+                      <div style="font-size: 0.82rem; color: var(--slate); margin-top: 0.2rem;">
+                        <strong>Note:</strong> {{ app_row["notes"] }}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <form method="POST" action="{{ url_for('update_application_status', opp_id=app_row['opportunity_id']) }}" class="app-edit-form">
+                    <div class="app-edit-row">
+                      <select name="status" class="field-select" style="width: auto; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+                        {% for st in ["Interested", "Saved", "Applied", "Under Review", "Shortlisted", "Selected", "Rejected", "Withdrawn"] %}
+                          <option value="{{ st }}" {% if app_row["status"] == st %}selected{% endif %}>{{ st }}</option>
+                        {% endfor %}
+                      </select>
+                      <input
+                        type="date"
+                        name="application_date"
+                        value="{{ app_row['application_date'] or '' }}"
+                        class="field-input"
+                        style="width: auto; padding: 0.36rem 0.55rem; font-size: 0.83rem;"
+                        title="Application date"
+                      />
+                      <button type="submit" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.84rem;">
+                        Update
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      name="notes"
+                      value="{{ app_row['notes'] or '' }}"
+                      placeholder="Personal notes (round, contact, link...)"
+                      class="field-input"
+                      style="padding: 0.38rem 0.6rem; font-size: 0.83rem;"
+                    />
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--slate); font-size: 0.92rem;">
+              You haven't tracked any applications yet. Open any opportunity in <a href="{{ url_for('explore') }}" style="color: var(--teal); font-weight: 600;">Explore</a> to start tracking.
+            </p>
+          {% endif %}
+        </section>
+      {% endif %}
+
+      <!-- 6. Saved Opportunities -->
+      {% if active_tab in ['overview', 'saved'] %}
+        <section class="card" id="saved-opportunities">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Saved Opportunities</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Bookmarks saved to your account ({{ saved_count }}). Approaching deadlines (within 7 days) trigger automatic alerts.
+              </p>
+            </div>
+          </div>
+
+          {% if saved_items %}
+            <div style="display: grid; gap: 0.75rem;">
+              {% for s_item in saved_items %}
+                {% set opp = s_item.opp %}
+                <div class="item-row" style="align-items: center;">
+                  <div>
+                    <a href="{{ url_for('opportunity_detail', opp_id=opp['id']) }}" style="font-weight: 700; color: var(--navy); text-decoration: none;">
+                      {{ opp["title"] }}
+                    </a>
+                    <div style="font-size: 0.86rem; color: var(--slate);">
+                      {{ opp["organization"] }} &middot; {{ opp["category"] }} &middot; {{ s_item.countdown }} &middot; {{ s_item.eval.status }} ({{ s_item.eval.match_percent }}%)
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <a href="{{ url_for('opportunity_detail', opp_id=opp['id']) }}" class="btn btn-secondary" style="padding: 0.42rem 0.75rem; font-size: 0.84rem;">
+                      Details
+                    </a>
+                    <form method="POST" action="{{ url_for('remove_saved_opportunity', opp_id=opp['id']) }}">
+                      <button type="submit" class="btn btn-secondary" style="padding: 0.42rem 0.75rem; font-size: 0.84rem;">
+                        Remove
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--slate); font-size: 0.92rem;">
+              No bookmarked opportunities yet. Save listings from <a href="{{ url_for('explore') }}" style="color: var(--teal); font-weight: 600;">Explore</a> to keep them here.
+            </p>
+          {% endif %}
+        </section>
+      {% endif %}
+
+      <!-- 7. Notifications Section -->
+      {% if active_tab in ['overview', 'notifications'] %}
+        <section class="card" id="notifications-panel">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Notifications</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Saved-deadline alerts and notification history ({{ unread_notifications }} unread).
+              </p>
+            </div>
+            {% if unread_notifications > 0 %}
+              <form method="POST" action="{{ url_for('mark_notifications_read') }}">
+                <button type="submit" class="btn btn-secondary" style="padding: 0.42rem 0.8rem; font-size: 0.84rem;">
+                  Mark All Read
+                </button>
+              </form>
+            {% endif %}
+          </div>
+
+          {% if notifications %}
+            <div style="display: grid; gap: 0.65rem;">
+              {% for notif in notifications %}
+                <div class="item-row" style="align-items: center; {% if notif['is_read'] == 0 %}border-left: 3px solid var(--teal);{% endif %}">
+                  <div>
+                    <div style="font-size: 0.93rem; font-weight: {% if notif['is_read'] == 0 %}700{% else %}500{% endif %}; color: var(--navy);">
+                      {{ notif["message"] }}
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--slate); margin-top: 0.15rem;">
+                      {{ notif["created_at"] }} &middot; {% if notif["is_read"] == 0 %}Unread{% else %}Read{% endif %}
+                    </div>
+                  </div>
+                  {% if notif["is_read"] == 0 %}
+                    <form method="POST" action="{{ url_for('mark_notifications_read') }}">
+                      <input type="hidden" name="notif_id" value="{{ notif['id'] }}" />
+                      <button type="submit" class="btn btn-secondary" style="padding: 0.35rem 0.7rem; font-size: 0.8rem;">
+                        Mark Read
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: var(--slate); font-size: 0.92rem;">No notifications yet.</p>
+          {% endif %}
+        </section>
+      {% endif %}
+
+      <!-- Profile, Graduation Year, Skills & Interests Management -->
+      {% if active_tab == 'profile' %}
+        <section class="card" id="profile-editor">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Academic Information</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Keep your degree, year, graduation year, and field of study accurate for Smart Eligibility checks.
+              </p>
+            </div>
+          </div>
+
+          <form method="POST" action="{{ url_for('update_profile') }}" style="display: grid; gap: 1rem;">
+            <div class="form-grid-2">
+              <div>
+                <label class="field-label" for="full_name">Full Name</label>
+                <input class="field-input" id="full_name" name="full_name" type="text" required value="{{ user['full_name'] }}" />
+              </div>
+              <div>
+                <label class="field-label" for="college">College / University</label>
+                <input class="field-input" id="college" name="college" type="text" required value="{{ user['college'] }}" />
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div>
+                <label class="field-label" for="degree">Degree</label>
+                <input class="field-input" id="degree" name="degree" type="text" required value="{{ user['degree'] }}" />
+              </div>
+              <div>
+                <label class="field-label" for="academic_year">Academic Year (1–5)</label>
+                <select class="field-select" id="academic_year" name="academic_year" required>
+                  {% for yr in [1, 2, 3, 4, 5] %}
+                    <option value="{{ yr }}" {% if user["academic_year"] == yr %}selected{% endif %}>Year {{ yr }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="graduation_year">Expected Graduation Year</label>
+                <input
+                  class="field-input"
+                  id="graduation_year"
+                  name="graduation_year"
+                  type="number"
+                  min="2020"
+                  max="2035"
+                  placeholder="e.g., 2028"
+                  value="{{ user['graduation_year'] or '' }}"
+                />
+              </div>
+              <div>
+                <label class="field-label" for="field_of_study">Field of Study</label>
+                <input class="field-input" id="field_of_study" name="field_of_study" type="text" required value="{{ user['field_of_study'] }}" />
+              </div>
+            </div>
+
+            <div>
+              <button type="submit" class="btn btn-primary">Save Academic Info</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card" id="skills-interests-manager">
+          <div class="section-top">
+            <div>
+              <h2 class="section-heading">Skills &amp; Interests Management</h2>
+              <p style="color: var(--slate); font-size: 0.9rem;">
+                Add or remove individual skills and interests used by the Smart Eligibility Engine.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <!-- Skills Manager -->
+            <div style="background-color: var(--soft-white); border: 1px solid var(--border); border-radius: 10px; padding: 1rem;">
+              <label class="field-label" for="skill_name">Your Skills ({{ skill_rows|length }})</label>
+              <form method="POST" action="{{ url_for('add_user_skill') }}" style="display: flex; gap: 0.5rem;">
+                <input class="field-input" id="skill_name" name="skill_name" type="text" placeholder="e.g., Python, SQL, React" required />
+                <button type="submit" class="btn btn-primary" style="padding: 0.5rem 0.9rem; font-size: 0.86rem;">Add</button>
+              </form>
+
+              <div class="tag-chip-list">
+                {% if skill_rows %}
+                  {% for sk in skill_rows %}
+                    <form method="POST" action="{{ url_for('remove_user_skill', skill_id=sk['id']) }}" style="display: inline;">
+                      <span class="tag-chip">
+                        <span>{{ sk["name"] }}</span>
+                        <button type="submit" title="Remove {{ sk['name'] }}">&times;</button>
+                      </span>
+                    </form>
+                  {% endfor %}
+                {% else %}
+                  <span style="font-size: 0.85rem; color: var(--slate);">No skills added yet.</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Interests Manager -->
+            <div style="background-color: var(--soft-white); border: 1px solid var(--border); border-radius: 10px; padding: 1rem;">
+              <label class="field-label" for="interest_name">Your Interests ({{ interest_rows|length }})</label>
+              <form method="POST" action="{{ url_for('add_user_interest') }}" style="display: flex; gap: 0.5rem;">
+                <input class="field-input" id="interest_name" name="interest_name" type="text" placeholder="e.g., Hackathons, AI Research" required />
+                <button type="submit" class="btn btn-primary" style="padding: 0.5rem 0.9rem; font-size: 0.86rem;">Add</button>
+              </form>
+
+              <div class="tag-chip-list">
+                {% if interest_rows %}
+                  {% for intr in interest_rows %}
+                    <form method="POST" action="{{ url_for('remove_user_interest', interest_id=intr['id']) }}" style="display: inline;">
+                      <span class="tag-chip">
+                        <span>{{ intr["name"] }}</span>
+                        <button type="submit" title="Remove {{ intr['name'] }}">&times;</button>
+                      </span>
+                    </form>
+                  {% endfor %}
+                {% else %}
+                  <span style="font-size: 0.85rem; color: var(--slate);">No interests added yet.</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      document.querySelectorAll(".rec-title-btn, .rec-why-btn").forEach((trigger) => {
+        trigger.addEventListener("click", () => {
+          const targetId = trigger.getAttribute("data-target");
+          const panel = document.getElementById(targetId);
+          if (!panel) return;
+
+          const isOpen = panel.classList.toggle("open");
+          const card = trigger.closest(".rec-card");
+          if (card) {
+            card.querySelectorAll(".rec-title-btn, .rec-why-btn").forEach((btn) => {
+              btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+            });
+            const whyBtn = card.querySelector(".rec-why-btn");
+            if (whyBtn) {
+              whyBtn.innerHTML = isOpen ? "Hide details &#9652;" : "Why this matches &#9662;";
+            }
+          }
+        });
+      });
+    })();
+  </script>
+{% endblock %}

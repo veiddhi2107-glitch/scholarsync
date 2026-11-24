@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ScholarSync{% endblock %}</title>
+  <style>
+    :root {
+      --navy: #101C36;
+      --navy-dark: #0B1326;
+      --teal: #14B8A6;
+      --teal-hover: #0D9488;
+      --white: #FFFFFF;
+      --soft-white: #F8FAFC;
+      --slate: #64748B;
+      --light-teal: #CCFBF1;
+      --border: #E2E8F0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      background-color: var(--soft-white);
+      color: var(--navy);
+      line-height: 1.55;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      background-color: var(--navy);
+      color: var(--white);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.9rem 1.5rem;
+    }
+
+    .navbar-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .brand span {
+      color: var(--teal);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: #E2E8F0;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 0.42rem 0.72rem;
+      border-radius: 8px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: var(--white);
+    }
+
+    .notif-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background-color: rgba(20, 184, 166, 0.18);
+      color: var(--white);
+      border: 1px solid rgba(20, 184, 166, 0.45);
+      border-radius: 999px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.52rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background-color: var(--teal);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--teal-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--light-teal);
+      color: var(--navy);
+    }
+
+    .btn-secondary:hover {
+      background-color: #99F6E4;
+    }
+
+    .btn-outline-light {
+      background-color: transparent;
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+
+    .btn-outline-light:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .page-container {
+      max-width: 1160px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem 3rem;
+      flex: 1;
+    }
+
+    .card {
+      background-color: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.35rem 1.5rem;
+      box-shadow: 0 4px 16px rgba(16, 28, 54, 0.04);
+    }
+
+    .badge-teal {
+      display: inline-block;
+      background-color: var(--light-teal);
+      color: var(--navy);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .flash-list {
+      display: grid;
+      gap: 0.55rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .flash-item {
+      padding: 0.72rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background-color: var(--light-teal);
+      color: var(--navy);
+      border: 1px solid rgba(20, 184, 166, 0.4);
+    }
+
+    .flash-item.error {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      border-color: #FCA5A5;
+    }
+
+    .site-footer {
+      background-color: var(--navy);
+      color: #CBD5E1;
+      padding: 1.15rem 1.5rem;
+      font-size: 0.86rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .site-footer-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a href="{{ url_for('index') }}" class="brand">Scholar<span>Sync</span></a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="{{ url_for('explore') }}" class="nav-link">Explore</a>
+        {% if current_user %}
+          <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+          {% if current_user["is_admin"] %}
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('dashboard', tab='notifications') }}" class="notif-pill">
+            Alerts: {{ unread_notifications }}
+          </a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-light" style="padding: 0.38rem 0.8rem; font-size: 0.85rem;">
+            Sign Out
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="nav-link">Sign In</a>
+          <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 0.38rem 0.85rem; font-size: 0.85rem;">
+            Get Started
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-list" role="status">
+          {% for category, msg in messages %}
+            <div class="flash-item {% if category == 'error' %}error{% endif %}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div><strong>ScholarSync</strong> &mdash; Student Opportunities, Smart Eligibility &amp; Application Tracker</div>
+      <div>Built with Flask &amp; SQLite</div>
+    </div>
+  </footer>
+</body>
+</html>
